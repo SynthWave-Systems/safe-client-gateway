@@ -49,8 +49,8 @@ import { TransactionsViewControllerModule } from '@/routes/transactions/transact
 import { DelegatesV2Module } from '@/routes/delegates/v2/delegates.v2.module';
 import { AccountsModule } from '@/routes/accounts/accounts.module';
 import { NotificationsModuleV2 } from '@/routes/notifications/v2/notifications.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { postgresConfig } from '@/config/entities/postgres.config';
 
 @Module({})
@@ -126,10 +126,15 @@ export class AppModule implements NestModule {
         }),
         TypeOrmModule.forRootAsync({
           imports: [ConfigModule],
-          useFactory: (configService: ConfigService) => {
+          useFactory: async (configService: ConfigService) => {
+            const typeormConfig = await configService.getOrThrow('typeorm');
+            const postgresConfigObject = postgresConfig(
+              await configService.getOrThrow('db.postgres'),
+            );
+
             return {
-              ...{ autoLoadEntities: true, manualInitialization: true },
-              ...postgresConfig(configService.getOrThrow('db.postgres')),
+              ...typeormConfig,
+              ...postgresConfigObject,
             };
           },
           inject: [ConfigService],
