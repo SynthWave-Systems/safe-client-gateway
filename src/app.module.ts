@@ -51,7 +51,7 @@ import { AccountsModule } from '@/routes/accounts/accounts.module';
 import { NotificationsModuleV2 } from '@/routes/notifications/v2/notifications.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { postgresFactory } from '@/config/entities';
+import { postgresConfig } from '@/config/entities/postgres.config';
 
 @Module({})
 export class AppModule implements NestModule {
@@ -126,8 +126,12 @@ export class AppModule implements NestModule {
         }),
         TypeOrmModule.forRootAsync({
           imports: [ConfigModule],
-          useFactory: (configService: ConfigService) =>
-            postgresFactory(configService),
+          useFactory: (configService: ConfigService) => {
+            return {
+              ...{ autoLoadEntities: true, manualInitialization: true },
+              ...postgresConfig(configService.getOrThrow('db.postgres')),
+            };
+          },
           inject: [ConfigService],
         }),
       ],
