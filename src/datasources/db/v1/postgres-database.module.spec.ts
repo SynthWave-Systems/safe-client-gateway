@@ -20,9 +20,9 @@ describe('PostgresDatabaseModule tests', () => {
       db: {
         ...baseConfiguration.db,
         postgres: {
-          ...baseConfiguration.db.postgres,
+          ...baseConfiguration.db.connection.postgres,
           ssl: {
-            ...baseConfiguration.db.postgres.ssl,
+            ...baseConfiguration.db.connection.postgres.ssl,
             enabled: !isCIContext,
             caPath: join(__dirname, '../../../../db_config/test/server.crt'),
           },
